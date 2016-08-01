@@ -31,9 +31,6 @@ import edu.umd.cs.findbugs.annotations.NonNull;
  */
 public enum HookEventType {
 
-    /**
-     * See <a href="https://confluence.atlassian.com/bitbucket/event-payloads-740262817.html#EventPayloads-Push">EventPayloads-Push</a>
-     */
     PUSH("push", PushHookProcessor.class);
 
     private String key;

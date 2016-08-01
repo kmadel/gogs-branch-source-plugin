@@ -228,7 +228,7 @@ public class GogsServerAPIClient implements GogsApi {
     }
 
     /**
-     * There is no such Team concept in Bitbucket Server but Project.
+     * Gogs Organization.
      */
     @Override
     public GogsOrganization getOrganization() {

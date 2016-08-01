@@ -40,15 +40,13 @@ import jenkins.scm.api.SCMSourceOwners;
  * on the mathing SCMSource.
  * 
  * TODO: Improvement - We could schedule a build only in the affected job instead of running a full reindex (since we
- *       have the branch contianing the commit in the hook payload). A full reindex would be forced only when the incoming 
+ *       have the branch containing the commit in the hook payload). A full reindex would be forced only when the incoming
  *       hook is resolved to a non-existent job (new branches or new PRs).
  */
 public abstract class HookProcessor {
 
     /**
-     * See <a href="https://confluence.atlassian.com/bitbucket/event-payloads-740262817.html">Event Payloads</a> for more
-     * information about the payload parameter format.
-     * 
+     *
      * @param payload the hook payload
      */
     public abstract void process(String payload);

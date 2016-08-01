@@ -9,7 +9,6 @@ package com.cloudbees.jenkins.plugins.gogs.server.client.repository;
  *   <li>member: returns repositories to which the user has explicit read access.</li>
  * </ul>
  *
- * See <a href="https://confluence.atlassian.com/bitbucket/repositories-endpoint-423626330.html#repositoriesEndpoint-GETalistofrepositoriesforanaccount">API docs</a> for more information.
  */
 public enum UserRoleInRepository {
 
