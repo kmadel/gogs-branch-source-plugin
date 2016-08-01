@@ -1,0 +1,19 @@
+<?jelly escape-by-default='true'?>
+<j:jelly xmlns:j="jelly:core" xmlns:l="/lib/layout">
+  <l:ajax>
+    <div>
+      <p>
+        Activate this option to auto-register a hook on all discovered Gogs repositories. This hook will notify Jenkins
+        about new commits on branches, so new builds will be triggered automatically on related jobs.
+      </p>
+      <p>
+        Otherwise the hook can be created manually using the following information:
+        <ul>
+          <li>URL: ${app.rootUrl != null ? app.rootUrl : "[JENKINS_ROOT_URL]/"}gogs-scmsource-hook/notify</li>
+          <li>Check "Push", "Pull Request Created" and "Pull Request Updated" in the triggers section.</li>
+        </ul>
+        NOTE: this Jenkins instance must be reachable from your Gogs server.
+      </p>
+    </div>
+  </l:ajax>
+</j:jelly>

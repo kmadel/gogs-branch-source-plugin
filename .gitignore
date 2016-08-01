@@ -1,0 +1,12 @@
+.project
+.classpath
+.settings
+target
+work
+.DS_Store
+
+# INTELLIJ
+.idea
+*.iml
+*.iws
+*.ipr

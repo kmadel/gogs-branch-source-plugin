@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?jelly escape-by-default='true'?>
+<j:jelly xmlns:j="jelly:core" xmlns:f="/lib/form" xmlns:c="/lib/credentials">
+    <f:entry title="${%Owner}" field="repoOwner">
+        <f:textbox/>
+    </f:entry>
+    <f:entry title="${%Scan credentials}" field="credentialsId">
+        <c:select/>
+    </f:entry>
+    <f:entry title="${%Repository name pattern}" field="pattern">
+        <f:textbox default=".*"/>
+    </f:entry>
+    <f:entry field="autoRegisterHooks">
+        <f:checkbox title="${%Auto-register webhooks}" />
+    </f:entry>
+    <f:advanced>
+        <f:entry title="${%Checkout credentials}" field="checkoutCredentialsId">
+            <c:select default="${descriptor.SAME}"/>
+        </f:entry>
+        <f:entry title="${%Gogs Server URL}" field="gogsServerUrl">
+          <f:textbox />
+        </f:entry>
+        <f:entry title="${%Gogs Server SSH port}" field="sshPort">
+            <f:textbox />
+        </f:entry>
+    </f:advanced>
+</j:jelly>

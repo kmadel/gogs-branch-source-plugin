@@ -1,0 +1,8 @@
+<?jelly escape-by-default='true'?>
+<j:jelly xmlns:j="jelly:core" xmlns:l="/lib/layout">
+  <l:ajax>
+    <div>
+      Repository owner. It will be used to build the repository URL: http://[gogs server url]/[owner]/repository
+    </div>
+  </l:ajax>
+</j:jelly>
