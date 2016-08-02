@@ -27,8 +27,14 @@ public class GogsOrgIcon extends FolderIcon {
 
     @Override
     public String getImageOf(String s) {
-        //TODO figure out how to use Gogs Org avatar - currently doesn't offer multiple sizes
-        return Stapler.getCurrentRequest().getContextPath()+ Hudson.RESOURCE_PATH+"/plugin/gogs-branch-source/images/logo/"+s+".png";
+        //TODO figure out how to always return correctly sized avatar if available
+        String url = getAvatarUrl();
+        if(url != null && (s.equalsIgnoreCase("48x48") || s.equalsIgnoreCase("64x64"))) {
+            return url;
+        } else {
+            // fall back to the generic github org icon
+            return Stapler.getCurrentRequest().getContextPath()+ Hudson.RESOURCE_PATH+"/plugin/gogs-branch-source/images/logo/"+s+".png";
+        }
     }
 
     @Override
