@@ -11,7 +11,7 @@ import org.kohsuke.stapler.Stapler;
 /**
  * Shows Avatar icon from Gogs organization/user.
  *
- * @author Kohsuke Kawaguchi
+ * @author Kurt Madel
  */
 public class GogsOrgIcon extends FolderIcon {
     private AbstractFolder<?> folder;
@@ -32,7 +32,7 @@ public class GogsOrgIcon extends FolderIcon {
         if(url != null && (s.equalsIgnoreCase("48x48") || s.equalsIgnoreCase("64x64"))) {
             return url;
         } else {
-            // fall back to the generic github org icon
+            // fall back to the generic gogs org icon
             return Stapler.getCurrentRequest().getContextPath()+ Hudson.RESOURCE_PATH+"/plugin/gogs-branch-source/images/logo/"+s+".png";
         }
     }

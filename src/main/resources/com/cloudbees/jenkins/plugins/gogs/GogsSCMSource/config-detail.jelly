@@ -29,5 +29,8 @@
     <f:entry title="${%Gogs Server SSH port}" field="sshPort">
       <f:textbox />
     </f:entry>
+    <f:entry title="${%Gogs Build Failure Label ID}" field="buildFailureLabelId">
+      <f:textbox />
+    </f:entry>
   </f:advanced>
 </j:jelly>

@@ -121,6 +121,11 @@ public class GogsSCMSource extends AbstractGitSCMSource {
     private int sshPort = -1;
 
     /**
+     * Label ID to use for Build Failure status issues.
+     */
+    private int buildFailureLabelId = -1;
+
+    /**
      * Gogs API client connector.
      */
     private transient GogsApiConnector gogsConnector;
@@ -198,6 +203,15 @@ public class GogsSCMSource extends AbstractGitSCMSource {
     @DataBoundSetter
     public void setSshPort(int sshPort) {
         this.sshPort = sshPort;
+    }
+
+    public int getBuildFailureLabelId() {
+        return buildFailureLabelId;
+    }
+
+    @DataBoundSetter
+    public void setBuildFailureLabelId(int buildFailureLabelId) {
+        this.buildFailureLabelId = buildFailureLabelId;
     }
 
     @DataBoundSetter

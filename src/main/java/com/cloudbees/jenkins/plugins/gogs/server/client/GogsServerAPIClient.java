@@ -31,6 +31,7 @@ import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import com.cloudbees.jenkins.plugins.gogs.api.*;
 import com.cloudbees.jenkins.plugins.gogs.server.client.repository.*;
 import org.apache.commons.httpclient.HttpClient;
 import org.apache.commons.httpclient.HttpException;
@@ -47,12 +48,6 @@ import org.codehaus.jackson.JsonGenerationException;
 import org.codehaus.jackson.map.JsonMappingException;
 import org.codehaus.jackson.map.ObjectMapper;
 
-import com.cloudbees.jenkins.plugins.gogs.api.GogsApi;
-import com.cloudbees.jenkins.plugins.gogs.api.GogsRepository;
-import com.cloudbees.jenkins.plugins.gogs.api.GogsRequestException;
-import com.cloudbees.jenkins.plugins.gogs.api.GogsOrganization;
-import com.cloudbees.jenkins.plugins.gogs.api.GogsWebHook;
-import com.cloudbees.jenkins.plugins.gogs.api.GogsRepositoryOwner;
 import com.cloudbees.jenkins.plugins.gogs.server.client.branch.GogsServerBranch;
 import com.cloudbees.plugins.credentials.common.StandardUsernamePasswordCredentials;
 
@@ -77,6 +72,8 @@ public class GogsServerAPIClient implements GogsApi {
     private static final String API_ORGANIZATION_PATH = API_BASE_PATH + "/orgs/%s";
     private static final String API_USER_PATH = API_BASE_PATH + "/users/%s";
     private static final String API_CONTENT_PATH = API_BASE_PATH + "/repos/%s/%s/raw/%s/%s";
+    private static final String API_ISSUES_PATH = API_BASE_PATH + "/repos/%s/%s/issues";
+
 
     /**
      * Repository owner.
@@ -192,6 +189,15 @@ public class GogsServerAPIClient implements GogsApi {
             postRequest(String.format(API_REPOSITORY_PATH, getOwner(), repositoryName) + "/hooks", asJson(hook));
         } catch (IOException e) {
             LOGGER.log(Level.SEVERE, "cannot register webhook", e);
+        }
+    }
+
+    @Override
+    public void createIssue(GogsIssue issue) {
+        try {
+            postRequest(String.format(API_ISSUES_PATH, getOwner(), repositoryName), serialize(issue));
+        } catch (IOException e) {
+            LOGGER.log(Level.SEVERE, "cannot create issue", e);
         }
     }
 
@@ -369,7 +375,9 @@ public class GogsServerAPIClient implements GogsApi {
 
     private <T> String serialize(T o) throws IOException {
         ObjectMapper mapper = new ObjectMapper();
-        return mapper.writeValueAsString(o);
+        String valueAsString = mapper.writeValueAsString(o);
+        LOGGER.info("serialized value: " + valueAsString);
+        return valueAsString;
     }
 
     private String postRequest(String path, NameValuePair[] params) throws UnsupportedEncodingException {

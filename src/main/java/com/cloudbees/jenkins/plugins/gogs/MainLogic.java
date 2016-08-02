@@ -15,6 +15,7 @@ import hudson.views.StatusColumn;
 import hudson.views.WeatherColumn;
 import jenkins.branch.OrganizationFolder;
 import jenkins.model.Jenkins;
+import org.apache.commons.lang.StringUtils;
 import org.jenkinsci.plugins.workflow.multibranch.WorkflowMultiBranchProject;
 
 import java.io.IOException;
@@ -50,7 +51,8 @@ public class MainLogic {
 
                 of.setIcon(new GogsOrgIcon());
                 of.replaceAction(new GogsOrgAction(org));
-                of.setDescription(org.getDescription());
+                if(StringUtils.isEmpty(of.getDescription()))
+                    of.setDescription(org.getDescription());
 
                 //TODO clean up org url creation
                 // build Gogs Org URL from avatarUrl
@@ -98,6 +100,8 @@ public class MainLogic {
                 item.setIcon(new GogsRepoIcon());
                 item.replaceAction(new GogsRepoAction(repo));
                 item.replaceAction(new GogsLink("repo",repo.getHtmlUrl()));
+                if(StringUtils.isEmpty(item.getDescription()))
+                    item.setDescription(repo.getDescription());
                 if (item.getView("Branches")==null && item.getView("All") instanceof AllView) {
                     // create initial views
                     ListView bv = new ListView("Branches");

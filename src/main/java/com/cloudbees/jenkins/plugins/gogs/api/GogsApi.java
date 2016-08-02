@@ -68,6 +68,13 @@ public interface GogsApi {
     void registerCommitWebHook(GogsWebHook hook);
 
     /**
+     * Create issue on repository.
+     *
+     * @param issue the issue object
+     */
+    void createIssue(GogsIssue issue);
+
+    /**
      * Remove the webhook (ID field required) from the repository.
      *
      * @param hook the webhook object
