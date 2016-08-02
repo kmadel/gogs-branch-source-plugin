@@ -25,8 +25,6 @@ package com.cloudbees.jenkins.plugins.gogs.api;
 
 import java.util.List;
 
-import com.cloudbees.jenkins.plugins.gogs.server.client.repository.UserRoleInRepository;
-
 import edu.umd.cs.findbugs.annotations.CheckForNull;
 
 /**
@@ -88,17 +86,13 @@ public interface GogsApi {
     GogsOrganization getOrganization();
 
     /**
-     * Returns the repositories where the user has the given role.
-     * 
-     * @param role Filter repositories by the owner having this role in. 
-     *             See {@link UserRoleInRepository} for more information. 
-     *             Use role = null if the repoOwner is a team ID.
-     * @return the repositories list (it can be empty)
+     * @return the Gogs user for the current owner.
      */
-    List<? extends GogsRepository> getRepositories(UserRoleInRepository role);
+    @CheckForNull
+    GogsRepositoryOwner getUser();
 
     /**
-     * Returns all the repositories for the current owner (even if it's a regular user or a team).
+     * Returns all the repositories for the current owner (even if it's a regular user or an organization).
      *
      * @return all repositories for the current {@link #getOwner()}
      */
@@ -109,5 +103,11 @@ public interface GogsApi {
      *          (if it's public or does not exists).
      */
     boolean isPrivate();
+
+
+    /**
+     * @return true if the path exists for repository branch.
+     */
+    boolean checkPathExists(String branch, String path);
 
 }

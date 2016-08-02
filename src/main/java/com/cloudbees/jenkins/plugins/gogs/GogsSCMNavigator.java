@@ -38,7 +38,6 @@ import org.kohsuke.stapler.QueryParameter;
 import com.cloudbees.jenkins.plugins.gogs.api.GogsApi;
 import com.cloudbees.jenkins.plugins.gogs.api.GogsRepository;
 import com.cloudbees.jenkins.plugins.gogs.api.GogsOrganization;
-import com.cloudbees.jenkins.plugins.gogs.server.client.repository.UserRoleInRepository;
 import com.cloudbees.plugins.credentials.CredentialsNameProvider;
 import com.cloudbees.plugins.credentials.common.StandardListBoxModel;
 import com.cloudbees.plugins.credentials.common.StandardUsernamePasswordCredentials;
@@ -161,15 +160,15 @@ public class GogsSCMNavigator extends SCMNavigator {
         }
         List<? extends GogsRepository> repositories;
         GogsApi gogs = getGogsConnector().create(repoOwner, credentials);
-        GogsOrganization team = gogs.getOrganization();
-        if (team != null) {
+        GogsOrganization organization = gogs.getOrganization();
+        if (organization != null) {
             // Navigate repositories of the team
-            listener.getLogger().format("Looking up repositories of team %s%n", repoOwner);
+            listener.getLogger().format("Looking up repositories of organization %s%n", repoOwner);
             repositories = gogs.getRepositories();
         } else {
             // Navigate the repositories of the repoOwner as a user
             listener.getLogger().format("Looking up repositories of user %s%n", repoOwner);
-            repositories = gogs.getRepositories(UserRoleInRepository.OWNER);
+            repositories = gogs.getRepositories();
         }
         for (GogsRepository repo : repositories) {
             add(listener, observer, repo);
@@ -216,7 +215,7 @@ public class GogsSCMNavigator extends SCMNavigator {
 
         @Override
         public String getIconFilePathPattern() {
-            return "plugin/cloudbees-gogs-branch-source/images/:size/gogs-scmnavigator.png";
+            return "plugin/gogs-branch-source/images/:size/gogs-scmnavigator.png";
         }
 
         @Override

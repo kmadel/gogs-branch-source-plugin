@@ -185,7 +185,6 @@ public class WebhookAutoRegisterListener extends ItemListener {
     }
 
     private GogsWebHook getHook() {
-        // TODO: generalize this for BB server
         GogsRepositoryHook hooks = new GogsRepositoryHook();
         hooks.setActive(true);
         hooks.setType("gogs");

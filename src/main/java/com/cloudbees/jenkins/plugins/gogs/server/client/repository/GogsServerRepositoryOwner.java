@@ -24,7 +24,9 @@
 package com.cloudbees.jenkins.plugins.gogs.server.client.repository;
 
 import com.cloudbees.jenkins.plugins.gogs.api.GogsRepositoryOwner;
+import org.codehaus.jackson.annotate.JsonIgnoreProperties;
 
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class GogsServerRepositoryOwner implements GogsRepositoryOwner {
 
     private int id;
@@ -32,14 +34,6 @@ public class GogsServerRepositoryOwner implements GogsRepositoryOwner {
     private String username;
 
     private String fullName;
-
-    public GogsServerRepositoryOwner(int id, String username, String fullName) {
-        this.id = id;
-        this.username = username;
-        this.fullName = fullName;
-    }
-
-
 
     @Override
     public int getId() {

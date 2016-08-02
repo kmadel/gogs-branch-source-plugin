@@ -26,50 +26,17 @@ package com.cloudbees.jenkins.plugins.gogs.server.client.repository;
 import java.util.List;
 
 import org.codehaus.jackson.annotate.JsonIgnoreProperties;
-import org.codehaus.jackson.annotate.JsonProperty;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class GogsServerRepositories {
     
-    private List<GogsServerRepository> values;
+    private List<GogsServerRepository> data;
 
-    private Integer size;
-
-    @JsonProperty("isLastPage")
-    private Boolean lastPage;
-
-    private Integer nextPageStart;
-
-    public List<GogsServerRepository> getValues() {
-        return values;
+    public List<GogsServerRepository> getData() {
+        return data;
     }
 
-    public void setValues(List<GogsServerRepository> values) {
-        this.values = values;
+    public void setData(List<GogsServerRepository> data) {
+        this.data = data;
     }
-
-    public Integer getSize() {
-        return size;
-    }
-
-    public void setSize(Integer size) {
-        this.size = size;
-    }
-
-    public Boolean isLastPage() {
-        return lastPage;
-    }
-
-    public void setLastPage(Boolean lastPage) {
-        this.lastPage = lastPage;
-    }
-
-    public Integer getNextPageStart() {
-        return nextPageStart;
-    }
-
-    public void setNextPageStart(Integer nextPageStart) {
-        this.nextPageStart = nextPageStart;
-    }
-
 }

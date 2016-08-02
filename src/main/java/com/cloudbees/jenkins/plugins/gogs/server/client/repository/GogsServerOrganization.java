@@ -28,6 +28,9 @@ import org.codehaus.jackson.annotate.JsonProperty;
 
 import com.cloudbees.jenkins.plugins.gogs.api.GogsOrganization;
 
+import java.net.MalformedURLException;
+import java.net.URL;
+
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class GogsServerOrganization implements GogsOrganization {
 
@@ -37,7 +40,12 @@ public class GogsServerOrganization implements GogsOrganization {
     @JsonProperty("full_name")
     private String displayName;
 
+    @JsonProperty("avatar_url")
+    private String avatarUrl;
+
     private String description;
+
+    private URL htmlUrl;
 
     @Override
     public String getName() {
@@ -66,4 +74,24 @@ public class GogsServerOrganization implements GogsOrganization {
         this.description = description;
     }
 
+    @Override
+    public String getAvatarUrl() {
+        return avatarUrl;
+    }
+
+    public void setAvatarUrl(String avatarUrl) {
+        this.avatarUrl = avatarUrl;
+    }
+
+    @Override
+    public URL getHtmlUrl() throws MalformedURLException {
+        // build Gogs Org URL from avatarUrl
+        URL endpoint = new URL(this.avatarUrl);
+        String protocol = this.avatarUrl.startsWith("https://") ? "https://" : "http://";
+        return new URL(protocol + endpoint.getHost() + ":" + endpoint.getPort() + "/" + this.name);
+    }
+
+    public void setHtmlUrl(URL htmlUrl) {
+        this.htmlUrl = htmlUrl;
+    }
 }

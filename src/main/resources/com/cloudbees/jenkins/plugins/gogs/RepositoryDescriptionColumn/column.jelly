@@ -1,0 +1,7 @@
+<?jelly escape-by-default='true'?>
+<j:jelly xmlns:j="jelly:core">
+  <td>
+    <j:set var="p" value="${col.getPropertyOf(job)}"/>
+      ${p.description}
+  </td>
+</j:jelly>

@@ -23,9 +23,11 @@
  */
 package com.cloudbees.jenkins.plugins.gogs;
 
+import java.io.IOException;
 import java.util.List;
 
 import javax.annotation.CheckForNull;
+import javax.annotation.Nonnull;
 
 import com.cloudbees.jenkins.plugins.gogs.api.GogsApi;
 import com.cloudbees.jenkins.plugins.gogs.server.client.GogsServerAPIClient;
@@ -56,11 +58,19 @@ public class GogsApiConnector {
     }
 
     public GogsApi create(String owner, String repository, StandardUsernamePasswordCredentials creds) {
-        return new GogsServerAPIClient(serverUrl, owner, repository, creds, false);
+        return new GogsServerAPIClient(serverUrl, owner, repository, creds);
     }
 
     public GogsApi create(String owner, StandardUsernamePasswordCredentials creds) {
-        return new GogsServerAPIClient(serverUrl, owner, creds, false);
+        return new GogsServerAPIClient(serverUrl, owner, creds);
+    }
+
+    public static @Nonnull GogsApi connect(@CheckForNull String apiUri, @CheckForNull String owner, @CheckForNull StandardUsernamePasswordCredentials credentials) throws IOException {
+        return new GogsServerAPIClient(apiUri, owner, credentials);
+    }
+
+    public static @Nonnull GogsApi connect(@CheckForNull String apiUri, @CheckForNull String owner, @CheckForNull String repositoryName, @CheckForNull StandardUsernamePasswordCredentials credentials) throws IOException {
+        return new GogsServerAPIClient(apiUri, owner, repositoryName, credentials);
     }
 
     @CheckForNull 
@@ -77,6 +87,22 @@ public class GogsApiConnector {
                               CredentialsMatchers.anyOf(CredentialsMatchers.instanceOf(type))));
             }
             return null;
+        }
+    }
+
+    public static @CheckForNull StandardUsernamePasswordCredentials lookupScanCredentials(@CheckForNull SCMSourceOwner context, @CheckForNull String apiUri, @CheckForNull String scanCredentialsId) {
+        if (Util.fixEmpty(scanCredentialsId) == null) {
+            return null;
+        } else {
+            return CredentialsMatchers.firstOrNull(
+                    CredentialsProvider.lookupCredentials(
+                            StandardUsernamePasswordCredentials.class,
+                            context,
+                            ACL.SYSTEM,
+                            gogsDomainRequirements(apiUri)
+                    ),
+                    CredentialsMatchers.allOf(CredentialsMatchers.withId(scanCredentialsId), gogsCredentialsMatcher())
+            );
         }
     }
 
@@ -102,6 +128,10 @@ public class GogsApiConnector {
 
     /* package */ List<DomainRequirement> gogsDomainRequirements() {
         return URIRequirementBuilder.fromUri(serverUrl).build();
+    }
+
+    private static List<DomainRequirement> gogsDomainRequirements(String apiUri) {
+        return URIRequirementBuilder.fromUri(apiUri).build();
     }
 
 }

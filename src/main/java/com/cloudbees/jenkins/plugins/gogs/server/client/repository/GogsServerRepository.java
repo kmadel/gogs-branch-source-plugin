@@ -37,6 +37,11 @@ public class GogsServerRepository implements GogsRepository {
 
     private GogsServerRepositoryOwner owner;
 
+    private String description;
+
+    @JsonProperty("html_url")
+    private String htmlUrl;
+
     // JSON mapping added in setter because the field can not be called "private"
     private Boolean priv;
 
@@ -75,6 +80,20 @@ public class GogsServerRepository implements GogsRepository {
     }
 
     @Override
+    public String getHtmlUrl() {
+        return htmlUrl;
+    }
+
+    @Override
+    public String getDescription() {
+        return description;
+    }
+
+    public void setDescription(String description) {
+        this.description = description;
+    }
+
+    @Override
     public boolean isPrivate() {
         return priv;
     }
@@ -82,6 +101,10 @@ public class GogsServerRepository implements GogsRepository {
     @JsonProperty("is_private")
     public void setPrivate(Boolean priv) {
         this.priv = priv;
+    }
+
+    public void setHtmlUrl(String htmlUrl) {
+        this.htmlUrl = htmlUrl;
     }
 
 }

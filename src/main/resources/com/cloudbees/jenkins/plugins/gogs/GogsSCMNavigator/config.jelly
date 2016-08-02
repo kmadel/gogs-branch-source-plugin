@@ -10,15 +10,15 @@
     <f:entry title="${%Repository name pattern}" field="pattern">
         <f:textbox default=".*"/>
     </f:entry>
+    <f:entry title="${%Gogs Server URL}" field="gogsServerUrl">
+        <f:textbox />
+    </f:entry>
     <f:entry field="autoRegisterHooks">
         <f:checkbox title="${%Auto-register webhooks}" />
     </f:entry>
     <f:advanced>
         <f:entry title="${%Checkout credentials}" field="checkoutCredentialsId">
             <c:select default="${descriptor.SAME}"/>
-        </f:entry>
-        <f:entry title="${%Gogs Server URL}" field="gogsServerUrl">
-          <f:textbox />
         </f:entry>
         <f:entry title="${%Gogs Server SSH port}" field="sshPort">
             <f:textbox />

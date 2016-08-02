@@ -23,6 +23,9 @@
  */
 package com.cloudbees.jenkins.plugins.gogs.api;
 
+import java.net.MalformedURLException;
+import java.net.URL;
+
 /**
  * Represents a Gogs organization.
  */
@@ -42,5 +45,18 @@ public interface GogsOrganization {
      * @return organization description.
      */
     String getDescription();
+
+    /**
+     * @return organization avatar url.
+     */
+    String getAvatarUrl();
+
+    /**
+     * @return organization html url.
+     * Currently constructed from avatar url as it is not returned for Gogs Orgs
+     */
+    URL getHtmlUrl() throws MalformedURLException;
+
+
 
 }

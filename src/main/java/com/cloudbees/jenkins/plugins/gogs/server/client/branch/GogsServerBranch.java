@@ -35,6 +35,9 @@ public class GogsServerBranch implements GogsBranch {
 
     private GogsServerCommit commit;
 
+    //Need to deal with repos that don't have any branches yet
+    private String message;
+
     public GogsServerBranch() {
     }
 
@@ -61,4 +64,11 @@ public class GogsServerBranch implements GogsBranch {
         this.commit = commit;
     }
 
+    public String getMessage() {
+        return message;
+    }
+
+    public void setMessage(String message) {
+        this.message = message;
+    }
 }

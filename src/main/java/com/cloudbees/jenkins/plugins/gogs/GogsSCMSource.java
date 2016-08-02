@@ -52,6 +52,7 @@ import org.kohsuke.stapler.DataBoundSetter;
 import org.kohsuke.stapler.QueryParameter;
 
 import javax.annotation.Nonnull;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
@@ -262,13 +263,54 @@ public class GogsSCMSource extends AbstractGitSCMSource {
             if (isExcluded(branchName)) {
                 continue;
             }
-            //TODO check against criteris
-            //SCMSourceCriteria branchCriteria = getCriteria();
+            SCMSourceCriteria criteria = getCriteria();
+            if (criteria != null) {
+                SCMSourceCriteria.Probe probe = getProbe(branchName, "branch", listener);
+                if (criteria.isHead(probe, listener)) {
+                    listener.getLogger().format("    Met criteria%n");
+                } else {
+                    listener.getLogger().format("    Does not meet criteria%n");
+                    continue;
+                }
+            }
             SCMHead head = new SCMHead(branchName);
             SCMRevision hash = new AbstractGitSCMSource.SCMRevisionImpl(head, branch.getCommit().getHash());
             observer.observe(head, hash);
 
         }
+    }
+
+
+    /**
+     * Returns a {@link jenkins.scm.api.SCMSourceCriteria.Probe} for use in {@link #retrieveBranches}.
+     *
+     * @param branch branch name
+     * @param thing readable name of what this is, e.g. {@code branch}
+     * @param listener A TaskListener to log useful information
+     *
+     * @return A {@link jenkins.scm.api.SCMSourceCriteria.Probe}
+     */
+    protected SCMSourceCriteria.Probe getProbe(final String branch, final String thing, final TaskListener listener) {
+        return new SCMSourceCriteria.Probe() {
+            private static final long serialVersionUID = 5012552654534124387L;
+            @Override public String name() {
+                return branch;
+            }
+            @Override public long lastModified() {
+                return 0; // TODO
+            }
+            @Override public boolean exists(@Nonnull String path) throws IOException {
+                final GogsApi gogs = getGogsConnector().create(repoOwner, repository, getScanCredentials());
+                boolean exists = gogs.checkPathExists(branch, path);
+
+                if(exists) {
+                    return true;
+                } else {
+                    listener.getLogger().format("      ‘%s’ does not exist in this %s%n", path, thing);
+                    return false;
+                }
+            }
+        };
     }
 
     @Override

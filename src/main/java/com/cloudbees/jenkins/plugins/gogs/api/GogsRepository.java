@@ -49,8 +49,17 @@ public interface GogsRepository {
     String getRepositoryName();
 
     /**
+     * @return the repository description
+     */
+    String getDescription();
+
+    /**
      * @return return true if the repository is a private one (false otherwise).
      */
     boolean isPrivate();
 
+    /**
+     * @return the repository html url
+     */
+    String getHtmlUrl();
 }

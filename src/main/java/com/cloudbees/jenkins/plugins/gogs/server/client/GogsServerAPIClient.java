@@ -26,12 +26,12 @@ package com.cloudbees.jenkins.plugins.gogs.server.client;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import com.cloudbees.jenkins.plugins.gogs.server.client.repository.*;
 import org.apache.commons.httpclient.HttpClient;
 import org.apache.commons.httpclient.HttpException;
 import org.apache.commons.httpclient.HttpStatus;
@@ -52,11 +52,8 @@ import com.cloudbees.jenkins.plugins.gogs.api.GogsRepository;
 import com.cloudbees.jenkins.plugins.gogs.api.GogsRequestException;
 import com.cloudbees.jenkins.plugins.gogs.api.GogsOrganization;
 import com.cloudbees.jenkins.plugins.gogs.api.GogsWebHook;
-import com.cloudbees.jenkins.plugins.gogs.server.client.repository.UserRoleInRepository;
+import com.cloudbees.jenkins.plugins.gogs.api.GogsRepositoryOwner;
 import com.cloudbees.jenkins.plugins.gogs.server.client.branch.GogsServerBranch;
-import com.cloudbees.jenkins.plugins.gogs.server.client.repository.GogsServerOrganization;
-import com.cloudbees.jenkins.plugins.gogs.server.client.repository.GogsServerRepositories;
-import com.cloudbees.jenkins.plugins.gogs.server.client.repository.GogsServerRepository;
 import com.cloudbees.plugins.credentials.common.StandardUsernamePasswordCredentials;
 
 import hudson.ProxyConfiguration;
@@ -78,6 +75,8 @@ public class GogsServerAPIClient implements GogsApi {
     private static final String API_BRANCHES_PATH = API_BASE_PATH + "/repos/%s/%s/branches";
     private static final String API_BRANCH_PATH = API_BASE_PATH + "/repos/%s/%s/branches/%s";
     private static final String API_ORGANIZATION_PATH = API_BASE_PATH + "/orgs/%s";
+    private static final String API_USER_PATH = API_BASE_PATH + "/users/%s";
+    private static final String API_CONTENT_PATH = API_BASE_PATH + "/repos/%s/%s/raw/%s/%s";
 
     /**
      * Repository owner.
@@ -103,28 +102,26 @@ public class GogsServerAPIClient implements GogsApi {
 
     private String baseURL;
 
-    public GogsServerAPIClient(String baseURL, String username, String password, String owner, String repositoryName, boolean userCentric) {
+    public GogsServerAPIClient(String baseURL, String username, String password, String owner, String repositoryName) {
         if (!StringUtils.isBlank(username) && !StringUtils.isBlank(password)) {
             this.credentials = new UsernamePasswordCredentials(username, password);
         }
-        this.userCentric = userCentric;
         this.owner = owner;
         this.repositoryName = repositoryName;
         this.baseURL = baseURL;
     }
 
-    public GogsServerAPIClient(String baseURL, String owner, String repositoryName, StandardUsernamePasswordCredentials creds, boolean userCentric) {
+    public GogsServerAPIClient(String baseURL, String owner, String repositoryName, StandardUsernamePasswordCredentials creds) {
         if (creds != null) {
             this.credentials = new UsernamePasswordCredentials(creds.getUsername(), Secret.toString(creds.getPassword()));
         }
-        this.userCentric = userCentric;
         this.owner = owner;
         this.repositoryName = repositoryName;
         this.baseURL = baseURL;
     }
 
-    public GogsServerAPIClient(String baseURL, String owner, StandardUsernamePasswordCredentials creds, boolean userCentric) {
-        this(baseURL, owner, null, creds, userCentric);
+    public GogsServerAPIClient(String baseURL, String owner, StandardUsernamePasswordCredentials creds) {
+        this(baseURL, owner, null, creds);
     }
 
     /**
@@ -136,18 +133,6 @@ public class GogsServerAPIClient implements GogsApi {
         return owner;
     }
 
-    /**
-     * In Gogs the top level entity is the Organization, but the JSON API accepts users as a replacement
-     * of Organizations in most of the URLs (it's called user centric API).
-     *
-     * This method returns the appropriate string to be placed in request URLs taking into account if this client
-     * object was created as a user centric instance or not.
-     * 
-     * @return the ~user or organization
-     */
-    public String getUserCentricOwner() {
-        return userCentric ? "~" + owner : owner;
-    }
 
     /** {@inheritDoc} */
     @Override
@@ -161,7 +146,7 @@ public class GogsServerAPIClient implements GogsApi {
         if (repositoryName == null) {
             return null;
         }
-        String response = getRequest(String.format(API_REPOSITORY_PATH, getUserCentricOwner(), repositoryName));
+        String response = getRequest(String.format(API_REPOSITORY_PATH, getOwner(), repositoryName));
         try {
             return parse(response, GogsServerRepository.class);
         } catch (IOException e) {
@@ -173,7 +158,7 @@ public class GogsServerAPIClient implements GogsApi {
     /** {@inheritDoc} */
     @Override
     public List<GogsServerBranch> getBranches() {
-        String url = String.format(API_BRANCHES_PATH, getUserCentricOwner(), repositoryName, 0);
+        String url = String.format(API_BRANCHES_PATH, getOwner(), repositoryName, 0);
 
         try {
             String response = getRequest(url);
@@ -191,7 +176,7 @@ public class GogsServerAPIClient implements GogsApi {
         if (repositoryName == null) {
             return null;
         }
-        String response = getRequest(String.format(API_BRANCH_PATH, getUserCentricOwner(), repositoryName, name));
+        String response = getRequest(String.format(API_BRANCH_PATH, getOwner(), repositoryName, name));
         try {
             return parse(response, GogsServerBranch.class);
         } catch (IOException e) {
@@ -204,7 +189,7 @@ public class GogsServerAPIClient implements GogsApi {
     @Override
     public void registerCommitWebHook(GogsWebHook hook) {
         try {
-            postRequest(String.format(API_REPOSITORY_PATH, getUserCentricOwner(), repositoryName) + "/hooks", asJson(hook));
+            postRequest(String.format(API_REPOSITORY_PATH, getOwner(), repositoryName) + "/hooks", asJson(hook));
         } catch (IOException e) {
             LOGGER.log(Level.SEVERE, "cannot register webhook", e);
         }
@@ -216,10 +201,12 @@ public class GogsServerAPIClient implements GogsApi {
     }
 
     @Override
-    public List<GogsWebHook> getWebHooks() {
+    public List<GogsRepositoryHook> getWebHooks() {
         try {
-            String response = getRequest(String.format(API_REPOSITORY_PATH, getUserCentricOwner(), repositoryName) + "/hooks");
-            List<GogsWebHook> repositoryHooks = parseCollection(response, GogsWebHook.class);
+            String url = String.format(API_REPOSITORY_PATH, getOwner(), repositoryName) + "/hooks";
+            LOGGER.info("getWebHooks url: " + url);
+            String response = getRequest(url);
+            List<GogsRepositoryHook> repositoryHooks = parseCollection(response, GogsRepositoryHook.class);
             return repositoryHooks;
         } catch (IOException e) {
             LOGGER.log(Level.SEVERE, "invalid hooks response", e);
@@ -245,21 +232,17 @@ public class GogsServerAPIClient implements GogsApi {
         }
     }
 
-    /**
-     * The role parameter is ignored for Gogs.
-     */
+    /** {@inheritDoc} */
     @Override
-    public List<GogsServerRepository> getRepositories(UserRoleInRepository role) {
-        String url = String.format(API_REPOSITORIES_PATH, getUserCentricOwner(), 0);
+    public List<GogsServerRepository> getRepositories() {
+        GogsRepositoryOwner user = getUser();
+        String url = String.format(API_REPOSITORIES_PATH, user.getId());
 
         try {
-            List<GogsServerRepository> repositories = new ArrayList<GogsServerRepository>();
-
             String response = getRequest(url);
-            GogsServerRepositories page = parse(response, GogsServerRepositories.class);
-            repositories.addAll(page.getValues());
+            GogsServerRepositories wrappedRepos = parse(response, GogsServerRepositories.class);
 
-            return repositories;
+            return wrappedRepos.getData();
         } catch (IOException e) {
             LOGGER.log(Level.SEVERE, "invalid repositories response", e);
         }
@@ -268,8 +251,27 @@ public class GogsServerAPIClient implements GogsApi {
 
     /** {@inheritDoc} */
     @Override
-    public List<GogsServerRepository> getRepositories() {
-        return getRepositories(null);
+    public GogsRepositoryOwner getUser() {
+        if (userCentric) {
+            return null;
+        } else {
+            String response = getRequest(String.format(API_USER_PATH, getOwner()));
+            try {
+                return parse(response, GogsServerRepositoryOwner.class);
+            } catch (IOException e) {
+                LOGGER.log(Level.WARNING, "invalid user response.", e);
+            }
+            return null;
+        }
+    }
+
+    /** {@inheritDoc} */
+    @Override
+    public boolean checkPathExists(String branch, String path) {
+        String url = String.format(API_CONTENT_PATH, getOwner(), repositoryName, branch, path);
+        LOGGER.info("checkPathExists url: " + url);
+        int status = getRequestStatus(url);
+        return status == HttpStatus.SC_OK;
     }
 
     @Override
