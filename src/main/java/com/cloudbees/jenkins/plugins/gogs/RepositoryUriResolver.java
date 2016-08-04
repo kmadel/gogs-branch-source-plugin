@@ -46,6 +46,7 @@ public abstract class RepositoryUriResolver {
                 // ignore
             }
         }
-        return "github.com";
+        //apiUri can't be null
+        throw new NullPointerException();
     }
 }

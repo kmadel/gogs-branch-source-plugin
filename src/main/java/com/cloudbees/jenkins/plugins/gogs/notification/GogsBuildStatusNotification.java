@@ -124,7 +124,7 @@ public class GogsBuildStatusNotification {
     }
 
     /**
-     * Returns the GitHub Repository associated to a Job.
+     * Returns the SCMSourceOwner associated to a Job.
      *
      * @param job A {@link Job}
      * @return A {@link GogsApi} or null, either if a scan credentials was not provided, or a GitHubSCMSource was not defined.
@@ -158,7 +158,7 @@ public class GogsBuildStatusNotification {
 
 
     /**
-     * With this listener one notifies to GitHub when the SCM checkout process has started.
+     * With this listener one notifies to Gogs when the SCM checkout process has started.
      * Possible option: GHCommitState.PENDING
      */
     @Extension public static class JobCheckOutListener extends SCMListener {
