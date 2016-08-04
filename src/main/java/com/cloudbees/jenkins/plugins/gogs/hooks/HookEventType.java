@@ -31,7 +31,8 @@ import edu.umd.cs.findbugs.annotations.NonNull;
  */
 public enum HookEventType {
 
-    PUSH("push", PushHookProcessor.class);
+    PUSH("push", PushHookProcessor.class),
+    CREATE("create", CreateHookProcessor.class);
 
     private String key;
     private Class<?> clazz;
