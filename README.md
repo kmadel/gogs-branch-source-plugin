@@ -37,7 +37,7 @@ Login to Gogs (http://192.168.99.100:10080) with username: `beedemo-user`  passw
   - desc: Gogs credentials for beedemo-user
 - On jenkins-team-1 create a 'Gogs Organization Folder' project named 'beedemo': repo url=http://192.168.99.100:10080, creds=gogs-beedemo-user
 
-Note: your network name may vary, especially on windows (`docker network ls`), also your Gogs URL/IP may vary based on your Docker Machine (check docker-machine ip {machine-name})
+Note: your network name may vary, especially on windows (`docker network ls`), also your Gogs URL/IP may vary based on your Docker Machine (check `docker-machine ip {machine-name}`)
 
 #### Tested Against
 
