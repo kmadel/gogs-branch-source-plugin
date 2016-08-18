@@ -20,7 +20,7 @@ A Jenkins Plugin that provides SCMSource (i.e. [Pipeline Multibranch](https://wi
 
 ### Use with CJP Trial
 
-There is a [prepopulated Gogs server Docker image](https://hub.docker.com/r/beedemo/gogs/) availalbe on Docker Hub. If you start this container and connect it to the same Docker network that is created when running the Dockerized CJP trial you will be able to experinece Jenkins Pipeline as Code in the lovely confines of your personal computer ;) Here is an example Docker command:
+There is a [prepopulated Gogs server Docker image](https://hub.docker.com/r/beedemo/gogs/) availalbe on Docker Hub. If you start this container and connect it to the same Docker network that is created when running the Dockerized CJP trial you will be able to experience Jenkins Pipeline as Code in the lovely confines of your personal computer ;) Here is an example Docker command:
 
 ```
 docker run -d --name=gogs --net="cjptrial_default" -p 10022:22 -p 10080:3000 beedemo/gogs:develop
