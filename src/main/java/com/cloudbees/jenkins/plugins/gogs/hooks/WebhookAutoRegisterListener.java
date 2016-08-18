@@ -192,8 +192,8 @@ public class WebhookAutoRegisterListener extends ItemListener {
         config.setUrl(Jenkins.getActiveInstance().getRootUrl() + GogsSCMSourcePushHookReceiver.FULL_PATH);
         config.setContent_type("json");
         hooks.setConfig(config);
-        //set both repo push and create event
-        hooks.setEvents(Arrays.asList(HookEventType.PUSH.getKey(), HookEventType.CREATE.getKey()));
+        //set hook for all event types
+        hooks.setEvents(Arrays.asList(HookEventType.PUSH.getKey(), HookEventType.CREATE.getKey(), HookEventType.PULL_REQUEST.getKey()));
         return hooks;
     }
 
