@@ -25,7 +25,19 @@ There is a [prepopulated Gogs server Docker image](https://hub.docker.com/r/beed
 ```
 docker run -d --name=gogs --net="cjptrial_default" -p 10022:22 -p 10080:3000 beedemo/gogs:develop
 ````
-Note: your network name may vary, especially on windows (`docker network ls`)
+Login to Gogs (http://192.168.99.100:10080) with username: `beedemo-user`  password: `admin`
+
+#### Set up a Gogs Organization Folder
+- On jenkins-team-1, upload the gogs-branch-source plugin from https://github.com/kmadel/gogs-branch-source-plugin/releases/download/v0.1-alpha/gogs-branch-source-0.1-alpha.hpi
+- On jenkins-team-1 update branch-api plugin to version 1.10
+- On jenkins-team-1, add credentials for Gogs user: Username/Password credentials
+  - user: beedemo-user
+  - password: admin
+  - id: gogs-beedemo-user
+  - desc: Gogs credentials for beedemo-user
+- On jenkins-team-1 create a 'Gogs Organization Folder' project named 'beedemo': repo url=http://192.168.99.100:10080, creds=gogs-beedemo-user
+
+Note: your network name may vary, especially on windows (`docker network ls`), also your Gogs URL/IP may vary based on your Docker Machine (check docker-machine ip {machine-name})
 
 #### Tested Against
 
