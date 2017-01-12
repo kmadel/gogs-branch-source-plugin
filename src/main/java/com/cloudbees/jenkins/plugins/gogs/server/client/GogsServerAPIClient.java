@@ -65,7 +65,7 @@ public class GogsServerAPIClient implements GogsApi {
 
     private static final Logger LOGGER = Logger.getLogger(GogsServerAPIClient.class.getName());
     private static final String API_BASE_PATH = "/api/v1";
-    private static final String API_REPOSITORIES_PATH = API_BASE_PATH + "/repos/search?q=_&uid=%d";
+    private static final String API_REPOSITORIES_PATH = API_BASE_PATH + "/repos/search?q=_&uid=%d&limit=%d";
     private static final String API_REPOSITORY_PATH = API_BASE_PATH + "/repos/%s/%s";
     private static final String API_BRANCHES_PATH = API_BASE_PATH + "/repos/%s/%s/branches";
     private static final String API_BRANCH_PATH = API_BASE_PATH + "/repos/%s/%s/branches/%s";
@@ -73,6 +73,7 @@ public class GogsServerAPIClient implements GogsApi {
     private static final String API_USER_PATH = API_BASE_PATH + "/users/%s";
     private static final String API_CONTENT_PATH = API_BASE_PATH + "/repos/%s/%s/raw/%s/%s";
     private static final String API_ISSUES_PATH = API_BASE_PATH + "/repos/%s/%s/issues";
+    private static final int DEFAULT_REPOSITORY_READ_LIMIT = 1000;
 
 
     /**
@@ -242,7 +243,7 @@ public class GogsServerAPIClient implements GogsApi {
     @Override
     public List<GogsServerRepository> getRepositories() {
         GogsRepositoryOwner user = getUser();
-        String url = String.format(API_REPOSITORIES_PATH, user.getId());
+        String url = String.format(API_REPOSITORIES_PATH, user.getId(), DEFAULT_REPOSITORY_READ_LIMIT);
 
         try {
             String response = getRequest(url);
@@ -349,7 +350,7 @@ public class GogsServerAPIClient implements GogsApi {
             if (username != null && !"".equals(username.trim())) {
                 LOGGER.info("Using proxy authentication (user=" + username + ")");
                 client.getState().setProxyCredentials(AuthScope.ANY,
-                    new UsernamePasswordCredentials(username, password));
+                        new UsernamePasswordCredentials(username, password));
             }
         }
         return client;
