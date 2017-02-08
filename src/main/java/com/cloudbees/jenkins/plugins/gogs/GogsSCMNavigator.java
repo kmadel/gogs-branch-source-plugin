@@ -142,6 +142,12 @@ public class GogsSCMNavigator extends SCMNavigator {
         return gogsConnector;
     }
 
+    @NonNull
+    @Override
+    protected String id() {
+        return getGogsServerUrl() + "::" + repoOwner ;
+    }
+
     @Override
     public void visitSources(SCMSourceObserver observer) throws IOException, InterruptedException {
         TaskListener listener = observer.getListener();
