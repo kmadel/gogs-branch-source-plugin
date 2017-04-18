@@ -65,7 +65,7 @@ public class GogsServerAPIClient implements GogsApi {
 
     private static final Logger LOGGER = Logger.getLogger(GogsServerAPIClient.class.getName());
     private static final String API_BASE_PATH = "/api/v1";
-    private static final String API_REPOSITORIES_PATH = API_BASE_PATH + "/repos/search?q=_&uid=%d";
+    private static final String API_REPOSITORIES_PATH = API_BASE_PATH + "/orgs/%s/repos";
     private static final String API_REPOSITORY_PATH = API_BASE_PATH + "/repos/%s/%s";
     private static final String API_BRANCHES_PATH = API_BASE_PATH + "/repos/%s/%s/branches";
     private static final String API_BRANCH_PATH = API_BASE_PATH + "/repos/%s/%s/branches/%s";
@@ -241,14 +241,14 @@ public class GogsServerAPIClient implements GogsApi {
     /** {@inheritDoc} */
     @Override
     public List<GogsServerRepository> getRepositories() {
-        GogsRepositoryOwner user = getUser();
-        String url = String.format(API_REPOSITORIES_PATH, user.getId());
+        // GogsRepositoryOwner user = getUser();
+        String url = String.format(API_REPOSITORIES_PATH, getOwner());
 
         try {
             String response = getRequest(url);
-            GogsServerRepositories wrappedRepos = parse(response, GogsServerRepositories.class);
 
-            return wrappedRepos.getData();
+            return parseCollection(response, GogsServerRepository.class);
+
         } catch (IOException e) {
             LOGGER.log(Level.SEVERE, "invalid repositories response", e);
         }
