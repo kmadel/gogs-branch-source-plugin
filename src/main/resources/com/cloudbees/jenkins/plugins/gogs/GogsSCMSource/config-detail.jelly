@@ -16,6 +16,9 @@
   <f:entry field="autoRegisterHook">
     <f:checkbox title="${%Auto-register webhook}" />
   </f:entry>
+  <f:entry field="autoCreateIssues">
+    <f:checkbox title="${%Auto-create an issue if build does not complete successfully}" />
+  </f:entry>
   <f:advanced>
     <f:entry title="${%Include branches}" field="includes">
       <f:textbox default="*"/>
