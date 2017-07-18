@@ -370,7 +370,7 @@ public class GogsServerAPIClient implements GogsApi {
             if (username != null && !"".equals(username.trim())) {
                 LOGGER.log(Level.FINE, "Using proxy authentication (user={0})", username);
                 client.getState().setProxyCredentials(AuthScope.ANY,
-                    new UsernamePasswordCredentials(username, password));
+                        new UsernamePasswordCredentials(username, password));
             }
         }
         
