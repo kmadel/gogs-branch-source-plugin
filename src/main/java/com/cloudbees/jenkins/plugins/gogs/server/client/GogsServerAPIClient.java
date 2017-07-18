@@ -26,6 +26,8 @@ package com.cloudbees.jenkins.plugins.gogs.server.client;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
+import java.net.InetSocketAddress;
+import java.net.Proxy;
 import java.util.Collections;
 import java.util.List;
 import java.util.logging.Level;
@@ -35,8 +37,10 @@ import com.cloudbees.jenkins.plugins.gogs.api.*;
 import com.cloudbees.jenkins.plugins.gogs.server.client.repository.*;
 import org.apache.commons.httpclient.HttpClient;
 import org.apache.commons.httpclient.HttpException;
+import org.apache.commons.httpclient.HttpMethod;
 import org.apache.commons.httpclient.HttpStatus;
 import org.apache.commons.httpclient.NameValuePair;
+import org.apache.commons.httpclient.URIException;
 import org.apache.commons.httpclient.UsernamePasswordCredentials;
 import org.apache.commons.httpclient.auth.AuthScope;
 import org.apache.commons.httpclient.methods.GetMethod;
@@ -47,6 +51,7 @@ import org.apache.commons.lang.StringUtils;
 import org.codehaus.jackson.JsonGenerationException;
 import org.codehaus.jackson.map.JsonMappingException;
 import org.codehaus.jackson.map.ObjectMapper;
+import org.codehaus.jackson.map.type.CollectionType;
 
 import com.cloudbees.jenkins.plugins.gogs.server.client.branch.GogsServerBranch;
 import com.cloudbees.plugins.credentials.common.StandardUsernamePasswordCredentials;
@@ -55,7 +60,6 @@ import hudson.ProxyConfiguration;
 import hudson.util.Secret;
 import jenkins.model.Jenkins;
 import net.sf.json.JSONObject;
-import org.codehaus.jackson.map.type.CollectionType;
 
 /**
  * Gogs API client.
@@ -74,7 +78,6 @@ public class GogsServerAPIClient implements GogsApi {
     private static final String API_CONTENT_PATH = API_BASE_PATH + "/repos/%s/%s/raw/%s/%s";
     private static final String API_ISSUES_PATH = API_BASE_PATH + "/repos/%s/%s/issues";
     private static final int DEFAULT_REPOSITORY_READ_LIMIT = 1000;
-
 
     /**
      * Repository owner.
@@ -302,10 +305,8 @@ public class GogsServerAPIClient implements GogsApi {
     }
 
     private String getRequest(String path) {
-        HttpClient client = getHttpClient();
-        client.getState().setCredentials(AuthScope.ANY, credentials);
         GetMethod httpget = new GetMethod(this.baseURL + path);
-        client.getParams().setAuthenticationPreemptive(true);
+        HttpClient client = getHttpClient(getMethodHost(httpget));
         String response = null;
         InputStream responseBodyAsStream = null;
         try {
@@ -330,37 +331,55 @@ public class GogsServerAPIClient implements GogsApi {
         }
         return response;
     }
+    
+    private static String getMethodHost(HttpMethod method) {
+        try {
+            return method.getURI().getHost();
+        } catch (URIException e) {
+            throw new IllegalStateException("Could not obtain host part for method " + method, e);
+        }
+    }    
 
-    private HttpClient getHttpClient() {
+    private HttpClient getHttpClient(String host) {
         HttpClient client = new HttpClient();
 
         client.getParams().setConnectionManagerTimeout(10 * 1000);
         client.getParams().setSoTimeout(60 * 1000);
 
+        client.getState().setCredentials(AuthScope.ANY, credentials);
+        client.getParams().setAuthenticationPreemptive(true);
+        
         Jenkins jenkins = Jenkins.getInstance();
-        ProxyConfiguration proxy = null;
+        ProxyConfiguration proxyConfig = null;
         if (jenkins != null) {
-            proxy = jenkins.proxy;
+        	proxyConfig = jenkins.proxy;
         }
-        if (proxy != null) {
-            LOGGER.info("Jenkins proxy: " + proxy.name + ":" + proxy.port);
-            client.getHostConfiguration().setProxy(proxy.name, proxy.port);
-            String username = proxy.getUserName();
-            String password = proxy.getPassword();
+        
+        Proxy proxy = Proxy.NO_PROXY;
+        if (proxyConfig != null) {
+        	// Takes noProxyHost into account while creating proxy from proxy configuration
+            proxy = proxyConfig.createProxy(host);
+        }
+        
+        if (proxy != Proxy.NO_PROXY) { // Use proxy
+            final InetSocketAddress proxyAddress = (InetSocketAddress)proxy.address();
+            LOGGER.log(Level.FINE, "Jenkins proxy: {0}", proxy.address());
+            client.getHostConfiguration().setProxy(proxyAddress.getHostString(), proxyAddress.getPort());
+            String username = proxyConfig.getUserName();
+            String password = proxyConfig.getPassword();
             if (username != null && !"".equals(username.trim())) {
-                LOGGER.info("Using proxy authentication (user=" + username + ")");
+                LOGGER.log(Level.FINE, "Using proxy authentication (user={0})", username);
                 client.getState().setProxyCredentials(AuthScope.ANY,
                         new UsernamePasswordCredentials(username, password));
             }
         }
+        
         return client;
     }
 
     private int getRequestStatus(String path) {
-        HttpClient client = getHttpClient();
-        client.getState().setCredentials(AuthScope.ANY, credentials);
         GetMethod httpget = new GetMethod(this.baseURL + path);
-        client.getParams().setAuthenticationPreemptive(true);
+        HttpClient client = getHttpClient(getMethodHost(httpget));
         try {
             client.executeMethod(httpget);
             return httpget.getStatusCode();
@@ -402,9 +421,7 @@ public class GogsServerAPIClient implements GogsApi {
     }
 
     private String postRequest(PostMethod httppost) throws UnsupportedEncodingException {
-        HttpClient client = getHttpClient();
-        client.getState().setCredentials(AuthScope.ANY, credentials);
-        client.getParams().setAuthenticationPreemptive(true);
+        HttpClient client = getHttpClient(getMethodHost(httppost));
         String response = null;
         InputStream responseBodyAsStream = null;
         try {

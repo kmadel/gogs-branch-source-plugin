@@ -110,6 +110,11 @@ public class GogsSCMSource extends AbstractGitSCMSource {
     private boolean autoRegisterHook = false;
 
     /**
+     * If true, an issue is automatically created when the build does not complete successfully.
+     */
+    private boolean autoCreateIssues = false;
+
+    /**
      * Gogs Server URL.
      * An specific HTTP client is used if this field is not null.
      */
@@ -194,6 +199,15 @@ public class GogsSCMSource extends AbstractGitSCMSource {
 
     public boolean isAutoRegisterHook() {
         return autoRegisterHook;
+    }
+
+    @DataBoundSetter
+    public void setAutoCreateIssues(boolean autoCreateIssues) {
+        this.autoCreateIssues = autoCreateIssues;
+    }
+
+    public boolean isAutoCreateIssues() {
+        return autoCreateIssues;
     }
 
     public int getSshPort() {
