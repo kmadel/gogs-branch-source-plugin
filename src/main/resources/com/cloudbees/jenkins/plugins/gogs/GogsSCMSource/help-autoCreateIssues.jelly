@@ -1,0 +1,11 @@
+<?jelly escape-by-default='true'?>
+<j:jelly xmlns:j="jelly:core" xmlns:l="/lib/layout">
+  <l:ajax>
+    <div>
+      <p>
+        Activate this option to auto-create an issue if build does not complete successfully (unstable, 
+        failure, aborted, etc.)
+      </p>
+    </div>
+  </l:ajax>
+</j:jelly>
