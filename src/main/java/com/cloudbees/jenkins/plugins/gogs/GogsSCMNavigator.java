@@ -60,6 +60,7 @@ public class GogsSCMNavigator extends SCMNavigator {
     private final String checkoutCredentialsId;
     private String pattern = ".*";
     private boolean autoRegisterHooks = false;
+    private boolean autoCreateIssues = false;
     private String gogsServerUrl;
     private int sshPort = -1;
 
@@ -86,6 +87,11 @@ public class GogsSCMNavigator extends SCMNavigator {
         this.autoRegisterHooks = autoRegisterHooks;
     }
 
+    @DataBoundSetter
+    public void setAutoCreateIssues(boolean autoCreateIssues) {
+        this.autoCreateIssues = autoCreateIssues;
+    }
+
     public String getRepoOwner() {
         return repoOwner;
     }
@@ -106,6 +112,10 @@ public class GogsSCMNavigator extends SCMNavigator {
 
     public boolean isAutoRegisterHooks() {
         return autoRegisterHooks;
+    }
+
+    public boolean isAutoCreateIssues() {
+      return autoCreateIssues;
     }
 
     public int getSshPort() {
@@ -142,6 +152,12 @@ public class GogsSCMNavigator extends SCMNavigator {
         return gogsConnector;
     }
 
+    @NonNull
+    @Override
+    protected String id() {
+        return getGogsServerUrl() + "::" + repoOwner ;
+    }
+    
     @Override
     public void visitSources(SCMSourceObserver observer) throws IOException, InterruptedException {
         TaskListener listener = observer.getListener();
@@ -191,6 +207,7 @@ public class GogsSCMNavigator extends SCMNavigator {
         scmSource.setCredentialsId(credentialsId);
         scmSource.setCheckoutCredentialsId(checkoutCredentialsId);
         scmSource.setAutoRegisterHook(isAutoRegisterHooks());
+        scmSource.setAutoCreateIssues(isAutoCreateIssues());
         scmSource.setGogsServerUrl(gogsServerUrl);
         scmSource.setSshPort(sshPort);
         projectObserver.addSource(scmSource);

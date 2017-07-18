@@ -64,53 +64,55 @@ public class GogsBuildStatusNotification {
             //no need to continue if there is no SCMSourceOwner
             if(scmSourceOwner != null) {
                 GogsSCMSource source = getSCMSource(scmSourceOwner);
-                int buildFailureLabelId = source.getBuildFailureLabelId();
-
-                GogsApi gogs = GogsApiConnector.connect(source.getGogsServerUrl(), source.getRepoOwner(), source.getRepository(), GogsApiConnector.lookupScanCredentials
-                        (scmSourceOwner, null, source.getCredentialsId()));
-
-                GogsRepository repo = gogs.getRepository();
-                if (repo != null) {
-                    List<Cause> causes = build.getCauses();
-                    for (Cause cause : causes) {
-                        LOGGER.info(cause.getClass().getName() + " cause short desc: " + cause.getShortDescription());
-                    }
-
-                    SCMRevisionAction action = build.getAction(SCMRevisionAction.class);
-                    if (action != null) {
-                        SCMRevision revision = action.getRevision();
-                        String url;
-                        try {
-                            url = build.getAbsoluteUrl();
-                        } catch (IllegalStateException ise) {
-                            url = "http://unconfigured-jenkins-location/" + build.getUrl();
+                if (source.isAutoCreateIssues()) {
+                    int buildFailureLabelId = source.getBuildFailureLabelId();
+    
+                    GogsApi gogs = GogsApiConnector.connect(source.getGogsServerUrl(), source.getRepoOwner(), source.getRepository(), GogsApiConnector.lookupScanCredentials
+                            (scmSourceOwner, null, source.getCredentialsId()));
+    
+                    GogsRepository repo = gogs.getRepository();
+                    if (repo != null) {
+                        List<Cause> causes = build.getCauses();
+                        for (Cause cause : causes) {
+                            LOGGER.info(cause.getClass().getName() + " cause short desc: " + cause.getShortDescription());
                         }
-                        boolean ignoreError = false;
-                        try {
-                            Result result = build.getResult();
-                            String revisionToNotify = resolveHeadCommit(revision);
-                            Job<?, ?> job = build.getParent();
-                            GogsServerIssue issue = null;
-                            if (Result.UNSTABLE.equals(result)) {
-                                issue = createCommitStatus(repo, revisionToNotify, GogsCommitState.FAILURE, url, Messages.GogsBuildStatusNotification_CommitStatus_Unstable(), job, buildFailureLabelId);
-                            } else if (Result.FAILURE.equals(result)) {
-                                issue = createCommitStatus(repo, revisionToNotify, GogsCommitState.FAILURE, url, Messages.GogsBuildStatusNotification_CommitStatus_Failure(), job, buildFailureLabelId);
-                            } else if (!Result.SUCCESS.equals(result) && result != null) { // ABORTED etc.
-                                issue = createCommitStatus(repo, revisionToNotify, GogsCommitState.ERROR, url, Messages.GogsBuildStatusNotification_CommitStatus_Other(), job, buildFailureLabelId);
+    
+                        SCMRevisionAction action = build.getAction(SCMRevisionAction.class);
+                        if (action != null) {
+                            SCMRevision revision = action.getRevision();
+                            String url;
+                            try {
+                                url = build.getAbsoluteUrl();
+                            } catch (IllegalStateException ise) {
+                                url = "http://unconfigured-jenkins-location/" + build.getUrl();
                             }
-                            if (issue != null) {
-                                LOGGER.info("create issue with title: " + issue.getTitle());
-                                gogs.createIssue(issue);
-                            }
-                            if (result != null) {
-                                listener.getLogger().format("%n" + Messages.GogsBuildStatusNotification_CommitStatusSet() + "%n%n");
-                            }
-                        } catch (FileNotFoundException fnfe) {
-                            if (!ignoreError) {
-                                listener.getLogger().format("%nCould not update commit status, please check if your scan " +
-                                        "credentials belong to a member of the organization or a collaborator of the " +
-                                        "repository and repo:status scope is selected%n%n");
-                                LOGGER.log(Level.FINE, null, fnfe);
+                            boolean ignoreError = false;
+                            try {
+                                Result result = build.getResult();
+                                String revisionToNotify = resolveHeadCommit(revision);
+                                Job<?, ?> job = build.getParent();
+                                GogsServerIssue issue = null;
+                                if (Result.UNSTABLE.equals(result)) {
+                                    issue = createCommitStatus(repo, revisionToNotify, GogsCommitState.FAILURE, url, Messages.GogsBuildStatusNotification_CommitStatus_Unstable(), job, buildFailureLabelId);
+                                } else if (Result.FAILURE.equals(result)) {
+                                    issue = createCommitStatus(repo, revisionToNotify, GogsCommitState.FAILURE, url, Messages.GogsBuildStatusNotification_CommitStatus_Failure(), job, buildFailureLabelId);
+                                } else if (!Result.SUCCESS.equals(result) && result != null) { // ABORTED etc.
+                                    issue = createCommitStatus(repo, revisionToNotify, GogsCommitState.ERROR, url, Messages.GogsBuildStatusNotification_CommitStatus_Other(), job, buildFailureLabelId);
+                                }
+                                if (issue != null) {
+                                    LOGGER.info("create issue with title: " + issue.getTitle());
+                                    gogs.createIssue(issue);
+                                }
+                                if (result != null) {
+                                    listener.getLogger().format("%n" + Messages.GogsBuildStatusNotification_CommitStatusSet() + "%n%n");
+                                }
+                            } catch (FileNotFoundException fnfe) {
+                                if (!ignoreError) {
+                                    listener.getLogger().format("%nCould not update commit status, please check if your scan " +
+                                            "credentials belong to a member of the organization or a collaborator of the " +
+                                            "repository and repo:status scope is selected%n%n");
+                                    LOGGER.log(Level.FINE, null, fnfe);
+                                }
                             }
                         }
                     }
@@ -170,7 +172,7 @@ public class GogsBuildStatusNotification {
     }
 
     /**
-     * With this listener one notifies to GitHub the build result.
+     * With this listener one notifies to Gogs the build result.
      * Possible options: GHCommitState.SUCCESS, GHCommitState.ERROR or GHCommitState.FAILURE
      */
     @Extension public static class JobCompletedListener extends RunListener<Run<?,?>> {
