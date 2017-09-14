@@ -264,9 +264,7 @@ public class GogsSCMSource extends AbstractGitSCMSource {
     }
 
     @Override
-    protected void retrieve(SCMHeadObserver observer, final TaskListener listener) throws IOException,
-            InterruptedException {
-
+    protected void retrieve(SCMSourceCriteria criteria, @NonNull SCMHeadObserver observer, SCMHeadEvent<?> event, @NonNull TaskListener listener) throws IOException, InterruptedException {
         StandardUsernamePasswordCredentials scanCredentials = getScanCredentials();
         if (scanCredentials == null) {
             listener.getLogger().format("Connecting to %s with no credentials, anonymous access%n", gogsServerUrl == null ? "https://gogs.org" : gogsServerUrl);

@@ -32,7 +32,7 @@
     </parent>
 
     <artifactId>gogs-branch-source</artifactId>
-    <version>0.2-SNAPSHOT</version>
+    <version>0.3-SNAPSHOT</version>
     <packaging>hpi</packaging>
 
     <name>Gogs Branch Source Plugin</name>
