@@ -191,7 +191,7 @@ public class GogsSCMNavigator extends SCMNavigator {
         }
     }
 
-    private void add(TaskListener listener, SCMSourceObserver observer, GogsRepository repo) throws InterruptedException {
+    private void add(TaskListener listener, SCMSourceObserver observer, GogsRepository repo) throws InterruptedException, IOException {
         String name = repo.getRepositoryName();
         if (!Pattern.compile(pattern).matcher(name).matches()) {
             listener.getLogger().format("Ignoring %s%n", name);
